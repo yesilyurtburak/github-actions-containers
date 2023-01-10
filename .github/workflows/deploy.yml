@@ -8,6 +8,7 @@ env:
   CACHE_KEY: node-deps
   MONGODB_DB_NAME: gha-demo
 jobs:
+  # remember that since we are using 'test' job inside a container, all test database connection etc. will be ended when the workflow completed. container is not gonna continue to run after workflow finished. This situation is completely different than where our real 'deployment database' runs continously. 
   test:
     environment: testing
     runs-on: ubuntu-latest
@@ -17,11 +18,18 @@ jobs:
       image: node:16
       # env: ...    # --> if the docker image needs to use environment variables.
     env:
-      MONGODB_CONNECTION_PROTOCOL: mongodb+srv
-      MONGODB_CLUSTER_ADDRESS: cluster0.qxejqdh.mongodb.net
-      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+      MONGODB_CONNECTION_PROTOCOL: mongodb # from official documentation.
+      MONGODB_CLUSTER_ADDRESS: mongodb # our service name which we defined in services. this is needed for communication between jobs ans service containers, since our 'test' job is inside a container.
+      MONGODB_USERNAME: root # dummy credentials for test database.
+      MONGODB_PASSWORD: example
       PORT: 8080
+    # add the service containers inside the 'services' field. Initialize the 'mongo' service below.
+    services:
+      mongodb: # custom name
+        image: mongo # base image name for the mongodb service container, found on 'hub.docker.com'
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root # since we are in 'test job' we can write username & password here.
+          MONGO_INITDB_ROOT_PASSWORD: example # these credentials are different than the credentials of actual deployment database.
     steps:
       - name: Get Code
         uses: actions/checkout@v3
