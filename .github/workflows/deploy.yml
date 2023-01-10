@@ -14,12 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     # from now on 'test' job run on a container. Steps in the job are running on container. 
     # ubuntu-latest is the host for the container.
-    container:
-      image: node:16
+    # container:         # ----> comment this field if the job is not going to run inside a container.
+    #   image: node:16
       # env: ...    # --> if the docker image needs to use environment variables.
     env:
       MONGODB_CONNECTION_PROTOCOL: mongodb # from official documentation.
-      MONGODB_CLUSTER_ADDRESS: mongodb # our service name which we defined in services. this is needed for communication between jobs ans service containers, since our 'test' job is inside a container.
+      # MONGODB_CLUSTER_ADDRESS: mongodb # our service name which we defined in services. this is needed for communication between jobs ans service containers, since our 'test' job is inside a container.
+      MONGODB_CLUSTER_ADDRESS: 127.0.0.1:27017 # network settings if our 'test' job is not inside a container.
       MONGODB_USERNAME: root # dummy credentials for test database.
       MONGODB_PASSWORD: example
       PORT: 8080
@@ -27,6 +28,8 @@ jobs:
     services:
       mongodb: # custom name
         image: mongo # base image name for the mongodb service container, found on 'hub.docker.com'
+        ports: # use this field if 'test' job is not inside the container, this is needed for port mapping.
+          - 27017:27017 # mongodb uses 27017 port.
         env:
           MONGO_INITDB_ROOT_USERNAME: root # since we are in 'test job' we can write username & password here.
           MONGO_INITDB_ROOT_PASSWORD: example # these credentials are different than the credentials of actual deployment database.
