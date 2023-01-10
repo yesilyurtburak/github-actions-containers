@@ -11,6 +11,11 @@ jobs:
   test:
     environment: testing
     runs-on: ubuntu-latest
+    # from now on 'test' job run on a container. Steps in the job are running on container. 
+    # ubuntu-latest is the host for the container.
+    container:
+      image: node:16
+      # env: ...    # --> if the docker image needs to use environment variables.
     env:
       MONGODB_CONNECTION_PROTOCOL: mongodb+srv
       MONGODB_CLUSTER_ADDRESS: cluster0.qxejqdh.mongodb.net
